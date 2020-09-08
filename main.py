@@ -23,28 +23,39 @@ def parse_args(argv=None):
     args = parser.parse_args(argv)
 
 
+def generate_csv(rawdata_filepath: str, csv_path: str):
+    """
+    根据原始数据，生成csv文件
+
+    :param rawdata_filepath: 原始数据路径
+    :param csv_path: csv文件路径
+    """
+    rawdata_filelist = []
+    if rawdata_filepath is None:
+        print('原始数据保存路径为空')
+        exit()
+    else:
+        rawdata_filelist = os.listdir(rawdata_filepath)
+
+    names = []
+    for filename in rawdata_filelist:
+        names.append(filename.split('.')[0])
+    csv_data = np.empty((len(names), 0))
+    csv_data = pd.DataFrame(data=csv_data, index=names)
+
+    for filename in tqdm(rawdata_filelist):
+        with open(f'{rawdata_filelist}/{filename}', 'r') as datafile:
+            data = json.load(datafile)
+            for x in data:
+                if x not in csv_data.columns.tolist():
+                    csv_data[x] = np.nan
+                csv_data.loc[filename.split('.')[0], x] = data[x]
+
+    csv_data.to_csv(csv_path)
+
+
 if __name__ == '__main__':
     parse_args()
 
     if args.start_status == 0:
-        if args.rawdata_filepath is None:
-            print('原始数据保存路径为空')
-            exit()
-        else:
-            rawdata_filelist = os.listdir(args.rawdata_filepath)
-
-        name = []
-        for filename in rawdata_filelist:
-            name.append(filename.split('.')[0])
-        csv_data = np.empty((len(name), 0))
-        csv_data = pd.DataFrame(data=csv_data, index=name)
-
-        for filename in tqdm(rawdata_filelist):
-            with open(f'{rawdata_filelist}/{filename}', 'r') as datafile:
-                data = json.load(datafile)
-                for x in data:
-                    if x not in csv_data.columns.tolist():
-                        csv_data[x] = np.nan
-                    csv_data.loc[filename.split('.')[0], x] = data[x]
-
-        csv_data.to_csv('PacificExcellent.csv')
+        generate_csv(args.rawdata_filepath, args.csv_path)
