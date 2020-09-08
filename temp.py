@@ -32,7 +32,6 @@ filelist = os.listdir(path)
 #             csv_data.loc[filename.split('.')[0], x] = data[x]
 #
 # csv_data.to_csv('PacificExcellent.csv')
-# csv_data.to_excel('PacificExcellent.xlsx')
 
 
 # 简单统计
