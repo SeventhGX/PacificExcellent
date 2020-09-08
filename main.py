@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 import matplotlib.pyplot as plt
+import calculator
 
 global args
 
@@ -16,8 +17,7 @@ def parse_args(argv=None):
     parser.add_argument('--csv_path', type=str,
                         default='./PacificExcellent.csv', help='整理好的csv文件路径')
     parser.add_argument('--rawdata_filepath', type=str,
-                        default=None,
-                        help='原始数据路径')
+                        default=None, help='原始数据路径')
 
     global args
     args = parser.parse_args(argv)
@@ -43,6 +43,7 @@ def generate_csv(rawdata_filepath: str, csv_path: str):
     csv_data = np.empty((len(names), 0))
     csv_data = pd.DataFrame(data=csv_data, index=names)
 
+    print('开始整理原始数据')
     for filename in tqdm(rawdata_filelist):
         with open(f'{rawdata_filelist}/{filename}', 'r') as datafile:
             data = json.load(datafile)
@@ -52,6 +53,7 @@ def generate_csv(rawdata_filepath: str, csv_path: str):
                 csv_data.loc[filename.split('.')[0], x] = data[x]
 
     csv_data.to_csv(csv_path)
+    print('原始数据整理完毕，已存入对应csv文件')
 
 
 if __name__ == '__main__':
