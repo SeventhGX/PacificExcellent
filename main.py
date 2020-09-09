@@ -18,9 +18,15 @@ def parse_args(argv=None):
                         default='./PacificExcellent.csv', help='整理好的csv文件路径')
     parser.add_argument('--rawdata_filepath', type=str,
                         default=None, help='原始数据路径')
+    parser.add_argument('--all', type=int, choices=[0, 1],
+                        default=0, help='是否计算全部的指标，0表示否，1表示是')
+    parser.add_argument('--entropy', type=int, choices=[0, 1],
+                        default=1, help='是否计算信息熵，0表示否，1表示是')
+    parser.add_argument('--pearsonr', type=int, choices=[0, 1],
+                        default=0, help='是否计算皮尔逊相关系数，0表示否，1表示是')
 
     global args
-    args = parser.parse_args(argv)
+    args = vars(parser.parse_args(argv))
 
 
 def generate_csv(rawdata_filepath: str, csv_path: str):
@@ -59,5 +65,16 @@ def generate_csv(rawdata_filepath: str, csv_path: str):
 if __name__ == '__main__':
     parse_args()
 
-    if args.start_status == 0:
-        generate_csv(args.rawdata_filepath, args.csv_path)
+    if args['start_status'] == 0:
+        generate_csv(args['rawdata_filepath'], args['csv_path'])
+
+    with open('./command2function.json', 'r') as fp:
+        com2func = json.load(fp)
+    sensors_data = pd.read_csv(args['csv_path'], low_memory=False, index_col=0)
+
+    for command in args:
+        if (args['all'] == 1 or args[command] == 1) \
+                and command not in ['all', 'start_status', 'csv_path', 'rawdata_filepath']:
+            function = com2func[command]
+            print(function)
+            print(getattr(calculator, function)(sensors_data))

@@ -1,1 +1,5 @@
-{}
+{
+  "info": "指令名：文件名",
+  "entropy": "info_entropys",
+  "pearsonr": "info_pearsonrs"
+}
