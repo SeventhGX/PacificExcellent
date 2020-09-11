@@ -2,6 +2,7 @@ import os
 import json
 import numpy as np
 import pandas as pd
+import re
 from tqdm import tqdm
 from scipy.stats import pearsonr
 import matplotlib.pyplot as plt
@@ -49,24 +50,26 @@ csv_data = pd.read_csv('./PacificExcellent.csv', low_memory=False)
 #         plt.plot(col_data)
 #         plt.show()
 # 92017 92020
-mean1 = csv_data['92018'].mean()
-csv_data['92018'].fillna(mean1, inplace=True)
-col1 = csv_data['92018'].values
-mean2 = csv_data['92020'].mean()
-csv_data['92020'].fillna(mean2, inplace=True)
-col2 = csv_data['92020'].values
-# print(pearsonr(col1, col2))
-numEntries = len(col1)  # 样本数
-labelCounts = {}  # 该数据集每个类别的频数
-for featVec in col1:  # 对每一行样本
-    currentLabel = featVec  # 该样本的标签
-    if currentLabel not in labelCounts.keys(): labelCounts[currentLabel] = 0
-    labelCounts[currentLabel] += 1
-shannonEnt = 0.0
-for key in labelCounts:
-    prob = float(labelCounts[key]) / numEntries  # 计算p(xi)
-    shannonEnt -= prob * log(prob, 2)  # log base 2
-print(shannonEnt)
+
+# mean1 = csv_data['92018'].mean()
+# csv_data['92018'].fillna(mean1, inplace=True)
+# col1 = csv_data['92018'].values
+# mean2 = csv_data['92020'].mean()
+# csv_data['92020'].fillna(mean2, inplace=True)
+# col2 = csv_data['92020'].values
+# # print(pearsonr(col1, col2))
+# numEntries = len(col1)  # 样本数
+# labelCounts = {}  # 该数据集每个类别的频数
+# for featVec in col1:  # 对每一行样本
+#     currentLabel = featVec  # 该样本的标签
+#     if currentLabel not in labelCounts.keys():
+#         labelCounts[currentLabel] = 0
+#     labelCounts[currentLabel] += 1
+# shannonEnt = 0.0
+# for key in labelCounts:
+#     prob = float(labelCounts[key]) / numEntries  # 计算p(xi)
+#     shannonEnt -= prob * log(prob, 2)  # log base 2
+# print(shannonEnt)
 
 # col_data = csv_data['12216'].dropna().values
 # a = 0
@@ -77,3 +80,9 @@ print(shannonEnt)
 # print(a)
 # print(len(col_data))
 # print(a / len(col_data))
+sensors = csv_data.columns.tolist()
+for sensor in sensors:
+    col = csv_data[sensor].values
+    for i in range(len(col)):
+        if '-' in str(col[i]) and str(col[i])[0] != '-':
+            print(sensor, i)

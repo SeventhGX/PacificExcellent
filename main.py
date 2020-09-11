@@ -20,10 +20,12 @@ def parse_args(argv=None):
                         default=None, help='原始数据路径')
     parser.add_argument('--all', type=int, choices=[0, 1],
                         default=0, help='是否计算全部的指标，0表示否，1表示是')
+    parser.add_argument('--integrality', type=int, choices=[0, 1],
+                        default=0, help='是否计算完整性，0表示否，1表示是')
     parser.add_argument('--entropy', type=int, choices=[0, 1],
-                        default=1, help='是否计算信息熵，0表示否，1表示是')
+                        default=0, help='是否计算信息熵，0表示否，1表示是')
     parser.add_argument('--pearsonr', type=int, choices=[0, 1],
-                        default=0, help='是否计算皮尔逊相关系数，0表示否，1表示是')
+                        default=1, help='是否计算皮尔逊相关系数，0表示否，1表示是')
 
     global args
     args = vars(parser.parse_args(argv))
@@ -76,5 +78,6 @@ if __name__ == '__main__':
         if (args['all'] == 1 or args[command] == 1) \
                 and command not in ['all', 'start_status', 'csv_path', 'rawdata_filepath']:
             function = com2func[command]
-            print(function)
-            print(getattr(calculator, function)(sensors_data))
+            index = getattr(calculator, function)(sensors_data)
+            print(index)
+            index.to_csv(f'{command}.csv')
