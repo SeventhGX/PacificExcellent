@@ -4,31 +4,32 @@ import json
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-import matplotlib.pyplot as plt
-import calculator
+from calculator import Calculator
 
 global args
 
 
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(description='数据质量评估系统运行参数')
-    parser.add_argument('--start_status', type=int, choices=[0, 1],
-                        default=1, help='0表示原始数据未被整理，1表示已经得到整合的csv文件')
+    parser.add_argument('--start_status', type=bool,
+                        default=True, help='原始数据是否整合为csv文件')
     parser.add_argument('--csv_path', type=str,
                         default='./PacificExcellent.csv', help='整理好的csv文件路径')
     parser.add_argument('--rawdata_filepath', type=str,
                         default=None, help='原始数据路径')
-    parser.add_argument('--all', type=int, choices=[0, 1],
-                        default=0, help='是否计算全部的指标，0表示否，1表示是')
-    parser.add_argument('--integrality', type=int, choices=[0, 1],
-                        default=0, help='是否计算完整性，0表示否，1表示是')
-    parser.add_argument('--entropy', type=int, choices=[0, 1],
-                        default=0, help='是否计算信息熵，0表示否，1表示是')
-    parser.add_argument('--pearsonr', type=int, choices=[0, 1],
-                        default=1, help='是否计算皮尔逊相关系数，0表示否，1表示是')
+    parser.add_argument('--visualization', type=bool,
+                        default=False, help='是否可视化计算结果')
+    parser.add_argument('--all', type=bool,
+                        default=False, help='是否计算全部的指标')
+    parser.add_argument('--integrality', type=bool,
+                        default=False, help='是否计算完整性')
+    parser.add_argument('--entropy', type=bool,
+                        default=True, help='是否计算信息熵')
+    parser.add_argument('--pearsonr', type=bool,
+                        default=False, help='是否计算皮尔逊相关系数')
 
     global args
-    args = vars(parser.parse_args(argv))
+    args = vars(parser.parse_args(argv))  # 用字典的形式保存参数
 
 
 def generate_csv(rawdata_filepath: str, csv_path: str):
@@ -67,17 +68,13 @@ def generate_csv(rawdata_filepath: str, csv_path: str):
 if __name__ == '__main__':
     parse_args()
 
-    if args['start_status'] == 0:
+    if not args['start_status']:
         generate_csv(args['rawdata_filepath'], args['csv_path'])
 
-    with open('./command2function.json', 'r') as fp:
-        com2func = json.load(fp)
     sensors_data = pd.read_csv(args['csv_path'], low_memory=False, index_col=0)
+    calculator = Calculator(sensors_data, args['visualization'])
 
     for command in args:
-        if (args['all'] == 1 or args[command] == 1) \
-                and command not in ['all', 'start_status', 'csv_path', 'rawdata_filepath']:
-            function = com2func[command]
-            index = getattr(calculator, function)(sensors_data)
-            print(index)
-            index.to_csv(f'{command}.csv')
+        if (args['all'] or args[command]) \
+                and command not in ['all', 'start_status', 'csv_path', 'rawdata_filepath', 'visualization']:
+            calculator.calculate(command)
